@@ -1,113 +1,174 @@
-import java.util.Scanner; 
+import java.util.Scanner;
 import java.util.HashMap;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.Duration;
 
-public class Main
-{
-	public static void main(String[] args) {
-	    Scanner scanner = new Scanner(System.in);
-	    Map<Cliente, Registro> user = new HashMap<>();
-	    
-	    boolean cont = true;
-	    
-	    while(cont) {
-	        
-	        System.out.println("Bem-vido ao Sistema.. ");
-	        System.out.println("Escolha uma opção");
-	        
-	        System.out.println("1 - Adicionar cliente");
-	        System.out.println("2 - Sair");
-	        System.out.println("3 - Clientes cadastrado");
-	        
-	        System.out.print("Digite sua escolha: ");
-	        int opt = scanner.nextInt();
-	        
-	        switch(opt){
-	            case 1:
-	                scanner.nextLine();
-	                
-	                System.out.print("Escreva o nome do usario: ");
-	                String nome = scanner.nextLine();
-	                
-	                System.out.print("Escreva a placa: ");
-	                String placa = scanner.nextLine();
-	                
-	                System.out.println(nome);
-	                
-                    // System.out.println("Escreva o horario: ");
-	                String horario = "18/20";
-	                
-	               // System.out.println("Escreva a data: ");
-	                String data = "17/03";
-	                
-	                Cliente cliente = new Cliente(nome, placa);
-	                Registro d_h = new Registro(horario, data);
-	                
-	                user.put(cliente, d_h);
-	                break;
-	           case 2:
-	               cont  = false;
-	               break;
-	           case 3:
-	               user.forEach((key, value) -> System.out.println(key + " -> " + value));
-                    break;
-	               
-	 
-	            
-	        }
 
-	    }
-
-	}
+public class Main {
+    
+    public static void main(String[] args){  
+        Ui_interface.main();
+    }
 }
 
+class Ui_interface {
+    public static void main() {
+        Scanner scanner = new Scanner(System.in);
+        Map<String, Registro> estacionamento = new HashMap<>(); 
+
+        double precoPorHora = 15.0;
+        boolean cont = true;
+
+        while (cont) {
+            System.out.println("\n====== Sistema de Estacionamento ======");
+            System.out.println("1 - Registrar entrada de veiculo");
+            System.out.println("2 - Registrar saida de veiculo");
+            System.out.println("3 - Listar veiculos no estacionamento");
+            System.out.println("4 - Sair");
+            System.out.print("Escolha uma opcao: ");
+
+            int opt = scanner.nextInt();
+            scanner.nextLine(); // limpar buffer
+
+            switch (opt) {
+                case 1:
+                    System.out.print("Nome do motorista: ");
+                    String nome = scanner.nextLine();
+
+                    System.out.print("Placa do veiculo: ");
+                    String placa = scanner.nextLine().toUpperCase();
+
+                    if (estacionamento.containsKey(placa)) {
+                        System.out.println("ERRO: Esse veiculo ja esta no estacionamento!");
+                        break;
+                    }
+
+                    Cliente cliente = new Cliente(nome, placa);
+                    Registro registro = new Registro(cliente);
+
+                    estacionamento.put(placa, registro);
+                    System.out.println("Veiculo registrado com sucesso!");
+                    System.out.println("Entrada: " + registro.getHorarioEntrada());
+                    break;
+
+                case 2:
+                    System.out.print("Placa do veiculo para saida: ");
+                    String placaSaida = scanner.nextLine().toUpperCase();
+
+                    if (!estacionamento.containsKey(placaSaida)) {
+                        System.out.println("ERRO: Veiculo nao encontrado no estacionamento.");
+                        break;
+                    }
+
+                    Registro reg = estacionamento.get(placaSaida);
+                    reg.registrarSaida();
+                    
+                    double horas = reg.calcularHoras();
+                    double valor = horas * precoPorHora;
+
+
+
+                    System.out.println("\n--- Comprovante de Saida ---");
+                    System.out.println("Cliente: " + reg.getCliente().getNome());
+                    System.out.println("Placa:   " + reg.getCliente().getPlaca());
+                    System.out.println("Entrada: " + reg.getHorarioEntrada());
+                    System.out.println("Saida:   " + reg.getHorarioSaida());
+                    System.out.printf("Tempo:   %.0f minuto(s)%n", horas * 60);
+                    System.out.printf("Valor:   R$ %.2f%n", valor);
+                    System.out.println("----------------------------");
+
+                    estacionamento.remove(placaSaida);
+                    break;
+
+                case 3:
+                    if (estacionamento.isEmpty()) {
+                        System.out.println("Nenhum veiculo no estacionamento.");
+                    } else {
+                        System.out.println("\n--- Veiculos no Estacionamento ---");
+                        for (Registro r : estacionamento.values()) {
+                            System.out.println(r);
+                        }
+                    }
+                    break;
+
+                case 4:
+                    cont = false;
+                    System.out.println("Encerrando sistema. Ate logo!");
+                    break;
+
+                default:
+                    System.out.println("Opcao invalida. Tente novamente.");
+            }
+        }
+        scanner.close();
+    }
+}
+
+
+// -----------------------------------------------
 class Cliente {
     private String nome;
     private String placa;
-    
-    public Cliente(String nome, String placa){
+    private boolean 15_min;
+
+    public Cliente(String nome, String placa) {
         this.nome = nome;
         this.placa = placa;
     }
-    
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-    
-    public void setPlaca(String placa){
-        this.placa = placa;
-    }
-    
-    public String getNome(String nome){
+
+    public String getNome() {
         return nome;
     }
-    
-    public String getPlaca(String placa){
+
+    public String getPlaca() {
         return placa;
     }
-    
 
-    public String toString(){
-        return "{ Nome: "+ nome  + " | Placa:  " + placa + " }";
+    public String toString() {
+        return "{ Nome: " + nome + " | Placa: " + placa + " }";
     }
 }
 
+// -----------------------------------------------
 class Registro {
-    private String data;
-    private String horario_entrada;
-    private String horario_saida;
-    
-    public Registro(String horario_entrada, String data) {
-        this.data = data;
-        this.horario_entrada = horario_entrada;
+    private Cliente cliente;
+    private LocalDateTime entrada;
+    private LocalDateTime saida;
+
+    DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    public Registro(Cliente cliente) {
+        this.cliente = cliente;
+        this.entrada = LocalDateTime.now(); 
     }
-    
-    public void setHorario_saida(String horario) {
-        this.horario_saida = horario_saida;
+
+    public void registrarSaida() {
+        this.saida = LocalDateTime.now();
     }
-    
-    public String toString(){
-        return "{ data:"+ data + "| horario: " + horario_entrada + "}"; 
+
+    public double calcularHoras() {
+        if (saida == null) return 0;
+        Duration duracao = Duration.between(entrada, saida);
+        return duracao.toMinutes();
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public String getHorarioEntrada() {
+        return entrada.format(formato);
+    }
+
+    public String getHorarioSaida() {
+        if (saida == null) return "ainda no estacionamento";
+        return saida.format(formato);
+    }
+
+    public String toString() {
+        return "{ " + cliente + " | Entrada: " + getHorarioEntrada() + " }";
     }
 }
 
