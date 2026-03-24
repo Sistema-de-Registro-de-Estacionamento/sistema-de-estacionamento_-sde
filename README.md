@@ -3,4 +3,4 @@ Davi gosta de java
 
 ## Imagem UML
 
-![Imagem UML](./imagens/Sistema de Registro de Estacionamento.drawio.png)
+![Cover](imagens/img_UML.png)
