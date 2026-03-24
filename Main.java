@@ -8,13 +8,42 @@ import java.time.Duration;
 
 public class Main {
     
-    public static void main(String[] args){  
+    public static void main(String[] args){
         Ui_interface.main();
     }
+    
 }
 
 class Ui_interface {
+    
+    public static void gerarDadosTeste(Map<String, Registro> estacionamento, int quantidade) {
+    
+        String[] nomes = {
+            "Carlos", "Ana", "Marcos", "Joao", "Pedro",
+            "Lucas", "Fernanda", "Julia", "Rafael", "Bruno"
+        };
+    
+        for (int i = 0; i < quantidade; i++) {
+    
+            String nome = nomes[(int)(Math.random() * nomes.length)];
+    
+            String placa =
+                "" + (char)(65 + Math.random()*26) +
+                (char)(65 + Math.random()*26) +
+                (char)(65 + Math.random()*26) +
+                "-" +
+                (int)(1000 + Math.random()*9000);
+    
+            Cliente cliente = new Cliente(nome, placa);
+            Registro registro = new Registro(cliente);
+    
+            estacionamento.put(placa, registro);
+        }
+    
+        System.out.println(quantidade + " veiculos de teste inseridos.");
+    }
     public static void main() {
+        
         Scanner scanner = new Scanner(System.in);
         Map<String, Registro> estacionamento = new HashMap<>(); 
 
@@ -27,6 +56,7 @@ class Ui_interface {
             System.out.println("2 - Registrar saida de veiculo");
             System.out.println("3 - Listar veiculos no estacionamento");
             System.out.println("4 - Sair");
+            System.out.println("5 - Gerar dados de teste");
             System.out.print("Escolha uma opcao: ");
 
             int opt = scanner.nextInt();
@@ -97,6 +127,15 @@ class Ui_interface {
                     cont = false;
                     System.out.println("Encerrando sistema. Ate logo!");
                     break;
+                
+                case 5:
+                    System.out.print("Quantos registros gerar? ");
+                    int qtd = scanner.nextInt();
+                    scanner.nextLine();
+                
+                    gerarDadosTeste(estacionamento, qtd);
+                
+                    break;     
 
                 default:
                     System.out.println("Opcao invalida. Tente novamente.");
@@ -111,7 +150,6 @@ class Ui_interface {
 class Cliente {
     private String nome;
     private String placa;
-    private boolean 15_min;
 
     public Cliente(String nome, String placa) {
         this.nome = nome;
