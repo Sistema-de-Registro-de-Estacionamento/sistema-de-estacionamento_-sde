@@ -46,3 +46,8 @@ Davi gosta de java
 ## Imagem UML
 
 ![Cover](imagens/img_UML.png)
+
+
+## Kanban
+
+![Cover](kanban.png)
